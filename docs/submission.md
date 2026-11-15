@@ -59,6 +59,9 @@ STATUS AND LIMITS
 TOOLS
 JavaScript (Node.js serverless functions on Vercel, no dependencies), HTML, CSS, Canvas and SVG for the interface, Python with astropy, NumPy and SciPy for the saved copies and for reference values, and 19 automated tests (node:test).
 
+SOURCE CODE
+https://github.com/frozenheart123/sky-detective
+
 ## Use of Super Intelligence (SI)
 
 Yes. I used Claude Code (Anthropic; models Claude Opus 5.5 and Claude Fable 5.2) as an AI coding assistant throughout.
