@@ -1,6 +1,6 @@
 # Sky Detective: text for the NASA Space Apps project page
 
-Paste each block into the field with the same name. Replace `YOUR-SITE` with the address Vercel gives you.
+Paste each block into the field with the same name.
 (AI-assisted: drafted with Claude Code. Read it and change anything that is not true for you.)
 
 ## Project Name
@@ -13,11 +13,11 @@ Sky Detective is a public web tool that turns NASA's SPHEREx infrared sky survey
 
 ## Link to Project Demo
 
-https://YOUR-SITE/slides.html
+https://sky-detective-orpin.vercel.app/slides.html
 
 ## Link to Final Project
 
-https://YOUR-SITE/
+https://sky-detective-orpin.vercel.app/
 
 ## Detailed Project Description
 
