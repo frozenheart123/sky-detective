@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sky Detective</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Spot stars that move or flicker in real SPHEREx infrared pictures of the sky.">
+<!-- AI-assisted: written with Claude Code (Anthropic, Claude Opus 5.5). Sky images: real SPHEREx data via NASA/IPAC IRSA. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=IBM+Plex+Mono:wght@500&family=Lexend:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="20" cy="20" r="14" fill="none" stroke="var(--sun)" stroke-width="4"/>
+        <line x1="30.5" y1="30.5" x2="42" y2="42" stroke="var(--sun)" stroke-width="5" stroke-linecap="round"/>
+        <path d="M20 11.5l2.3 5.2 5.6.5-4.2 3.7 1.3 5.5L20 23.5l-5 2.9 1.3-5.5-4.2-3.7 5.6-.5z" fill="var(--mint)"/>
+      </svg>
+      <div>
+        <h1 data-i18n="appName">Sky Detective</h1>
+        <p data-i18n="tagline">Spot stars that move or flicker in real infrared pictures of the sky.</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <span class="score" id="score" role="status"><span id="scoreLabel">Cases solved</span><span class="pips" id="pips" aria-hidden="true"></span><span id="scoreNum">0/5</span></span>
+      <button class="btn" id="langBtn" type="button" aria-label="Switch language">中文</button>
+      <button class="switch" id="grownSwitch" type="button" role="switch" aria-checked="false">
+        <span class="track" aria-hidden="true"></span><span data-i18n="grown">Grown-up mode</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel pick" aria-labelledby="h-pick">
+      <h2 id="h-pick"><span class="step">1</span><span data-i18n="step1">Pick a sky spot</span></h2>
+      <div class="pick-body">
+        <div class="globe-col">
+          <div class="globe" id="globe" role="group" aria-label="3D sky globe">
+            <div class="gl-labels" id="glLabels"></div>
+            <span class="earth-tag" data-i18n="earth">Earth (you are here)</span>
+          </div>
+          <p class="hint-text" id="globeHelp" data-i18n="globeHelp">Drag to spin the sky. Tap a glowing dot to fly there.</p>
+        </div>
+        <div class="pick-list">
+          <ul class="targets" id="targets"></ul>
+          <form class="search" id="searchForm" autocomplete="off">
+            <label class="label" for="searchInput" data-i18n="searchLabel">Or type your own</label>
+            <div class="search-row">
+              <input id="searchInput" type="text" data-i18n-ph="searchPh" placeholder="Star name or numbers like 269.45 4.69">
+              <button class="btn btn-sun" type="submit" data-i18n="go">Go</button>
+            </div>
+            <p class="search-msg" id="searchMsg" aria-live="polite"></p>
+            <button class="btn btn-quiet" type="button" id="surpriseBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l10 10h3M4 17h3l3-3M14 10l3-3h3M18 4l2 3-2 3M18 14l2 3-2 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span data-i18n="surprise">Surprise me</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel view" aria-labelledby="h-view">
+      <h2 id="h-view"><span class="step">2</span><span data-i18n="step2">Watch the sky blink</span></h2>
+      <div class="sky-frame" id="skyFrame">
+        <canvas id="sky" width="768" height="768" aria-label="Sky picture. Click on the star you think is moving or changing."></canvas>
+        <canvas id="fx" aria-hidden="true"></canvas>
+        <div class="chip-date">
+          <span class="label" data-i18n="taken">Sky visit</span>
+          <strong id="dateText">…</strong>
+          <span class="of" id="ofText"></span>
+        </div>
+        <span class="badge-real" data-i18n="real">Real SPHEREx data</span>
+        <div class="sky-msg" id="skyMsg" hidden><span id="skyMsgText"></span></div>
+        <div class="scalebar" aria-hidden="true"><i></i><span>1′</span></div>
+        <div class="compass" aria-hidden="true">
+          <svg viewBox="0 0 62 62"><path d="M46 46V16M46 46H16" stroke="var(--text)" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M41 21l5-7 5 7M21 41l-7 5 7 5" stroke="var(--text)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="n" data-i18n="north">N</span><span class="e" data-i18n="east">E</span>
+        </div>
+      </div>
+
+      <div class="transport">
+        <button class="stepbtn" id="prevBtn" type="button" data-i18n-aria="prev" aria-label="Previous picture">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="play" id="playBtn" type="button" aria-label="Pause">
+          <svg id="icoPause" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.5" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1.5" fill="currentColor"/></svg>
+          <svg id="icoPlay" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+        </button>
+        <button class="stepbtn" id="nextBtn" type="button" data-i18n-aria="next" aria-label="Next picture">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="timeline" id="timeline" role="group" aria-label="Sky visits"></div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <span class="label" data-i18n="speed">Blink speed</span>
+          <div class="seg" id="speedSeg" role="group">
+            <button type="button" data-speed="1000" data-i18n="slow">Slow</button>
+            <button type="button" data-speed="550" data-i18n="normal" aria-pressed="true">Normal</button>
+            <button type="button" data-speed="230" data-i18n="fast">Fast</button>
+          </div>
+          <span class="label" data-i18n="brightness">Brightness</span>
+          <div class="range-row">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            <input type="range" id="brightness" min="0" max="100" value="55" data-i18n-aria="brightness" aria-label="Brightness">
+            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <button class="switch" id="diffSwitch" type="button" role="switch" aria-checked="false">
+            <span class="track" aria-hidden="true"></span><span data-i18n="changes">Show only what changed</span>
+          </button>
+        </div>
+        <div class="control">
+          <span class="label" data-i18n="glasses">Infrared glasses</span>
+          <div class="dets" id="dets" role="group"></div>
+          <p class="hint-text" data-i18n="glassesHelp">SPHEREx sees 6 kinds of light our eyes can't.</p>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel case" aria-labelledby="h-case">
+      <h2 id="h-case"><span class="step">3</span><span data-i18n="step3">Solve the case</span></h2>
+      <p class="mission" id="missionText"></p>
+      <p class="result" id="result" aria-live="polite"></p>
+      <div class="case-actions">
+        <button class="btn" type="button" id="hintBtn" data-i18n="hint">Give me a hint</button>
+        <button class="btn btn-quiet" type="button" id="revealBtn" data-i18n="reveal">Show me</button>
+        <span class="tries" id="triesText"></span>
+      </div>
+      <div class="fact">
+        <h3 id="factTitle">Barnard's Star</h3>
+        <p id="factText"></p>
+        <dl class="stats" id="stats"></dl>
+      </div>
+      <div class="spec" id="specBox">
+        <h3 data-i18n="specTitle">Light fingerprint</h3>
+        <p id="specNote"></p>
+        <div class="chart">
+          <svg id="specChart" viewBox="0 0 300 160" role="img" aria-label="Spectrum: brightness of the target at each infrared wavelength"></svg>
+          <p class="note" id="specMsg"></p>
+        </div>
+        <p class="hint-text" data-i18n="specIntro">Each dot is one SPHEREx picture.</p>
+      </div>
+      <div class="adv" id="adv" hidden>
+        <h3 data-i18n="advTitle">For grown-up astronomers</h3>
+        <dl class="coords" id="coords"></dl>
+        <div class="adv-grid">
+          <label for="blackPt"><span data-i18n="blackPt">Black point</span><input type="range" id="blackPt" min="0" max="100" value="20"></label>
+          <label for="stretchSel"><span data-i18n="stretch">Stretch</span>
+            <select id="stretchSel">
+              <option value="soft" data-i18n="soft">Soft (asinh)</option>
+              <option value="linear" data-i18n="linear">Linear</option>
+            </select>
+          </label>
+        </div>
+        <button class="switch" id="gaiaSwitch" type="button" role="switch" aria-checked="true">
+          <span class="track" aria-hidden="true"></span><span data-i18n="gaia">Show Gaia stars (2016 positions)</span>
+        </button>
+        <button class="switch" id="smoothSwitch" type="button" role="switch" aria-checked="false">
+          <span class="track" aria-hidden="true"></span><span data-i18n="smooth">Smooth out noise</span>
+        </button>
+        <div class="chart">
+          <span class="label" id="chartTitle">Brightness of the target</span>
+          <svg id="chart" viewBox="0 0 300 130" role="img" aria-label="Brightness of the target in each sky visit"></svg>
+          <p class="note" id="chartNote"></p>
+        </div>
+        <div class="share">
+          <input id="shareInput" type="text" readonly aria-label="Share link">
+          <button class="btn" type="button" id="copyBtn" data-i18n="copy">Copy</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <p class="foot" data-i18n="foot"></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="i18n.js"></script>
+<script src="data.js"></script>
+<script src="charts.js"></script>
+<script src="globe.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

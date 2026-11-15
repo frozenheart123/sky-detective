@@ -1,0 +1,8 @@
+.venv/
+node_modules/
+.claude/
+.claude-flow/
+.impeccable/
+.vercel/
+__pycache__/
+pipeline/diag/

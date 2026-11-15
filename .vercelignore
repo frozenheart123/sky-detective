@@ -1,0 +1,7 @@
+.venv
+.claude
+.claude-flow
+node_modules
+web
+pipeline
+tests

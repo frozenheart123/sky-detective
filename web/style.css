@@ -1,0 +1,213 @@
+/* Sky Detective styles. AI-assisted: written with Claude Code (Anthropic, Claude Opus 5.5). */
+/* Layout: one detective's desk in three columns: pick a sky spot (left), the blinking sky (centre, the hero),
+   the case file (right). Two rows on tablets, one column on phones. Single dark theme: sky images read best on black. */
+:root {
+  color-scheme: dark;
+  --night: #0b0d1d;
+  --void: #03040b;
+  --panel: #13172e;
+  --raise: #1c2142;
+  --raise-hi: #272d58;
+  --line: #2d3364;
+  --text: #eef0ff;
+  --muted: #a9aed6;
+  --sun: #ffc23d;
+  --sun-ink: #1f1600;
+  --mint: #46e0c8;
+  --coral: #ff7a59;
+  --glass: rgba(6, 8, 22, .74);
+  --d1: #6fb8ff; --d2: #59d6d0; --d3: #8fe07a; --d4: #e3d75a; --d5: #ffa24a; --d6: #ff5f6d;
+  --font-display: "Fredoka", "Lexend", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --font-body: "Lexend", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r-card: 18px;
+  --r-ctl: 12px;
+}
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+html { background: var(--night) }
+body {
+  margin: 0;
+  background: radial-gradient(1100px 460px at 50% -200px, var(--raise) 0%, transparent 70%) no-repeat, var(--night);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px 28px;
+}
+button, input, select { font: inherit; color: inherit }
+button:disabled { opacity: .45; cursor: not-allowed }
+:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px }
+.app { max-width: 1340px; margin: 0 auto; display: grid; gap: 16px }
+
+/* Header */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0 }
+.brand svg { flex: none }
+.brand h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(24px, 3.2vw, 32px); line-height: 1.1; margin: 0 }
+.brand p { margin: 2px 0 0; color: var(--muted); font-size: 14px }
+.top-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap }
+.score { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-weight: 600; font-variant-numeric: tabular-nums; min-height: 42px }
+.score .pips { display: inline-flex; gap: 4px }
+.score .pip { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--muted) }
+.score .pip.on { background: var(--mint); border-color: var(--mint) }
+
+.btn { border-radius: 999px; border: 1px solid var(--line); background: var(--raise); padding: 8px 16px; min-height: 42px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500 }
+.btn:hover { background: var(--raise-hi) }
+.btn-sun { background: var(--sun); color: var(--sun-ink); border-color: transparent; font-weight: 600 }
+.btn-sun:hover { background: var(--sun); filter: brightness(1.06) }
+.btn-quiet { background: transparent }
+
+.switch { display: inline-flex; align-items: center; gap: 10px; background: transparent; border: 0; padding: 4px 0; cursor: pointer; min-height: 42px; text-align: left }
+.switch .track { width: 46px; height: 26px; border-radius: 999px; background: var(--raise-hi); border: 1px solid var(--line); position: relative; flex: none; transition: background .15s }
+.switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--muted); transition: transform .15s, background .15s }
+.switch[aria-checked="true"] .track { background: var(--mint) }
+.switch[aria-checked="true"] .track::after { transform: translateX(20px); background: var(--void) }
+
+/* Main grid */
+.layout { display: grid; grid-template-columns: minmax(280px, 340px) minmax(0, 1fr) minmax(280px, 340px); grid-template-areas: "pick view case"; gap: 16px; align-items: start }
+.pick { grid-area: pick } .view { grid-area: view } .case { grid-area: case }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-card); padding: 16px; display: grid; gap: 14px; min-width: 0 }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: 20px; line-height: 1.2; margin: 0; display: flex; align-items: center; gap: 10px; text-wrap: balance }
+.step { width: 30px; height: 30px; border-radius: 50%; background: var(--sun); color: var(--sun-ink); display: inline-grid; place-items: center; font-size: 16px; flex: none }
+.hint-text { color: var(--muted); font-size: 13.5px; margin: 0 }
+.label { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 500 }
+
+/* Step 1: targets and globe */
+.targets { display: grid; gap: 10px; list-style: none; margin: 0; padding: 0 }
+.target { width: 100%; display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px; border-radius: 14px; border: 2px solid transparent; background: var(--raise); cursor: pointer; text-align: left; position: relative }
+.target:hover { background: var(--raise-hi) }
+.target[aria-pressed="true"] { border-color: var(--sun); background: var(--raise-hi) }
+.target canvas { width: 56px; height: 56px; border-radius: 10px; image-rendering: pixelated; background: var(--void); display: block }
+.target .t-name { font-weight: 600; font-size: 15.5px; display: block; line-height: 1.25; padding-right: 24px }
+.target .t-short { color: var(--muted); font-size: 13px; display: block; line-height: 1.35; margin-top: 2px }
+.target .solved { position: absolute; top: 8px; right: 10px; width: 22px; height: 22px; border-radius: 50%; background: var(--mint); color: var(--void); display: grid; place-items: center; font-size: 13px; font-weight: 700 }
+.kind { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; letter-spacing: .04em; margin-top: 6px; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor }
+.kind.move { color: var(--mint) } .kind.vary { color: var(--coral) }
+.kind::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor }
+.search { display: grid; gap: 8px }
+.search-row { display: flex; gap: 8px }
+.search input { flex: 1; min-width: 0; background: var(--void); border: 1px solid var(--line); border-radius: var(--r-ctl); padding: 10px 12px; min-height: 44px }
+.search input::placeholder { color: var(--muted); opacity: .8 }
+.search-msg { min-height: 1.2em; font-size: 13px; color: var(--coral); margin: 0 }
+.pick-body, .pick-list, .globe-col { display: grid; gap: 14px; min-width: 0 }
+.globe-col { gap: 8px }
+.globe { position: relative; width: 100%; max-width: 420px; margin: 0 auto; aspect-ratio: 1 / 1; border-radius: 16px; overflow: hidden; background: radial-gradient(circle at 50% 50%, var(--raise) 0%, var(--void) 72%) }
+.globe canvas { width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab }
+.globe canvas:active { cursor: grabbing }
+.gl-labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden }
+.gl-label { position: absolute; left: 0; top: 0; pointer-events: auto; border: 1px solid var(--line); background: var(--glass); border-radius: 999px; padding: 3px 9px; font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: opacity .2s }
+.gl-label::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--sun) }
+.gl-label.move::before { background: var(--mint) } .gl-label.vary::before { background: var(--coral) }
+.gl-label.on { border-color: var(--sun); color: var(--sun) }
+.gl-label.back { opacity: 0; pointer-events: none }
+.earth-tag { position: absolute; left: 50%; top: 50%; transform: translate(-50%, 22px); font-size: 11px; color: var(--muted); pointer-events: none; white-space: nowrap; background: var(--glass); padding: 1px 6px; border-radius: 6px }
+
+/* Step 2: viewer */
+.sky-frame { position: relative; width: 100%; max-width: 640px; margin: 0 auto; aspect-ratio: 1 / 1; border-radius: 14px; overflow: hidden; background: var(--void); box-shadow: 0 0 0 1px var(--line) }
+#sky, #fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block }
+#sky { image-rendering: pixelated; cursor: crosshair; touch-action: manipulation }
+#fx { pointer-events: none }
+.chip-date { position: absolute; top: 12px; left: 12px; background: var(--glass); border-radius: 12px; padding: 8px 12px; display: grid; pointer-events: none; max-width: calc(100% - 24px) }
+.chip-date .label { font-size: 10.5px }
+.chip-date strong { font-family: var(--font-display); font-weight: 600; font-size: clamp(16px, 2.4vw, 22px); line-height: 1.2 }
+.chip-date span.of { font-size: 12px; color: var(--muted) }
+.badge-real { position: absolute; top: 12px; right: 12px; background: var(--glass); color: var(--mint); border: 1px solid var(--mint); border-radius: 999px; font-size: 12px; font-weight: 600; padding: 4px 10px; pointer-events: none }
+.sky-msg { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--muted); font-size: 15px; pointer-events: none }
+.sky-msg span { max-width: 34ch; background: var(--glass); padding: 12px 16px; border-radius: 12px }
+.scalebar { position: absolute; left: 14px; bottom: 14px; display: grid; gap: 4px; justify-items: start; pointer-events: none }
+.scalebar i { display: block; height: 4px; width: calc(var(--sky-w, 100%) * 9.68 / 48); min-width: 24px; background: var(--text); border-radius: 2px }
+.scalebar span, .compass span { font-family: var(--font-mono); font-size: 12px; background: var(--glass); padding: 1px 6px; border-radius: 6px }
+.compass { position: absolute; right: 14px; bottom: 14px; width: 62px; height: 62px; pointer-events: none }
+.compass svg { position: absolute; inset: 0 }
+.compass .n { position: absolute; top: -4px; right: -2px }
+.compass .e { position: absolute; bottom: -2px; left: -8px }
+
+.transport { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center }
+.play { width: 62px; height: 62px; border-radius: 50%; background: var(--sun); color: var(--sun-ink); border: 0; cursor: pointer; display: grid; place-items: center; flex: none; box-shadow: 0 6px 18px -6px var(--sun) }
+.play:hover { filter: brightness(1.06) }
+.stepbtn { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--raise); cursor: pointer; display: grid; place-items: center; flex: none }
+.stepbtn:hover { background: var(--raise-hi) }
+.timeline { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center }
+.tick { border: 1px solid var(--line); background: var(--raise); border-radius: 999px; padding: 6px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; font-variant-numeric: tabular-nums }
+.tick .dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--muted) }
+.tick[aria-pressed="true"] { border-color: var(--sun); background: var(--raise-hi) }
+.tick[aria-pressed="true"] .dot { background: var(--sun); border-color: var(--sun) }
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px }
+.control { background: var(--raise); border-radius: 14px; padding: 12px; display: grid; gap: 10px; align-content: start; min-width: 0 }
+.seg { display: flex; gap: 4px; background: var(--void); border-radius: 999px; padding: 4px }
+.seg button { flex: 1; border: 0; background: transparent; border-radius: 999px; padding: 6px 8px; cursor: pointer; min-height: 36px; font-weight: 500 }
+.seg button[aria-pressed="true"] { background: var(--sun); color: var(--sun-ink) }
+.dets { display: flex; flex-wrap: wrap; gap: 6px }
+.det { border: 2px solid transparent; background: var(--void); border-radius: 12px; padding: 6px 10px 6px 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 40px }
+.det .sw { width: 12px; height: 12px; border-radius: 50%; flex: none }
+.det b { font-weight: 600 }
+.det small { font-family: var(--font-mono); font-size: 11px; color: var(--muted) }
+.det[aria-pressed="true"] { border-color: var(--sun) }
+.det .star { color: var(--sun); font-size: 12px; font-weight: 600 }
+input[type=range] { width: 100%; accent-color: var(--sun); min-height: 30px }
+.range-row { display: flex; align-items: center; gap: 10px }
+.range-row svg { flex: none; color: var(--muted) }
+
+/* Step 3: case file */
+.mission { font-size: 16px; line-height: 1.5; margin: 0 }
+.result { border-radius: 14px; padding: 12px 14px; background: var(--raise); font-size: 14.5px; margin: 0; min-height: 3em }
+.result.good { background: var(--raise-hi); box-shadow: inset 0 0 0 2px var(--mint) }
+.result.miss { box-shadow: inset 0 0 0 2px var(--coral) }
+.result .stamp { display: block; font-family: var(--font-display); font-weight: 600; font-size: 18px; color: var(--mint); margin-bottom: 2px }
+.case-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center }
+.tries { margin-left: auto; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums }
+.fact, .spec { border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 10px }
+.fact h3, .spec h3 { font-family: var(--font-display); font-weight: 600; font-size: 17px; margin: 0 }
+.fact p, .spec p { margin: 0; font-size: 14.5px }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0 }
+.stats div { background: var(--raise); border-radius: 12px; padding: 8px 10px; min-width: 0 }
+.stats dt { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em }
+.stats dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums }
+.chart { background: var(--void); border-radius: 12px; padding: 10px; display: grid; gap: 6px }
+.chart svg { width: 100%; height: auto; display: block }
+.chart .axis { stroke: var(--line) }
+.chart .grid { stroke: var(--raise) }
+.chart .lineC { stroke: var(--mint); fill: none; stroke-width: 2.5 }
+.chart .lineS { stroke: var(--sun); fill: none; stroke-width: 2.5; stroke-linejoin: round }
+.chart .pt { fill: var(--mint) }
+.chart .pt.sat { fill: var(--void); stroke: var(--coral); stroke-width: 2 }
+.chart .sp { fill: var(--mint); fill-opacity: .35 }
+.chart text { fill: var(--muted); font-size: 11px; font-family: var(--font-body) }
+.chart .note { font-size: 12px; color: var(--muted); margin: 0 }
+.adv { border-top: 1px dashed var(--line); padding-top: 14px; display: grid; gap: 12px }
+.adv h3 { font-size: 14px; margin: 0; color: var(--mint); font-weight: 600; letter-spacing: .02em }
+.coords { font-family: var(--font-mono); font-size: 13px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; margin: 0 }
+.coords dt { color: var(--muted) }
+.coords dd { margin: 0; overflow-wrap: anywhere }
+.adv select { background: var(--void); border: 1px solid var(--line); border-radius: var(--r-ctl); padding: 8px 10px; min-height: 40px; width: 100% }
+.adv-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px }
+.adv-grid label { display: grid; gap: 4px; font-size: 13px; color: var(--muted) }
+.share { display: flex; gap: 8px }
+.share input { flex: 1; min-width: 0; background: var(--void); border: 1px solid var(--line); border-radius: var(--r-ctl); padding: 8px 10px; font-family: var(--font-mono); font-size: 12px }
+
+.foot { color: var(--muted); font-size: 13px; text-align: center; max-width: 80ch; margin: 4px auto 0 }
+
+@media (max-width: 1120px) {
+  .layout { grid-template-columns: minmax(0, 1fr) minmax(270px, 330px); grid-template-areas: "pick pick" "view case" }
+  .pick-body { grid-template-columns: minmax(240px, 340px) minmax(0, 1fr); align-items: start }
+  .targets { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) }
+}
+@media (max-width: 760px) {
+  .layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "pick" "view" "case" }
+  .targets { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(230px, 80%); overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px }
+  .targets li { scroll-snap-align: start }
+  .pick-body { grid-template-columns: minmax(0, 1fr) }
+  .globe { max-width: 320px }
+  .compass { width: 46px; height: 46px; right: 10px; bottom: 10px }
+  .chip-date { top: 8px; left: 8px; padding: 6px 10px; max-width: 55% }
+  .chip-date span.of { font-size: 11px }
+  .badge-real { top: 8px; right: 8px; max-width: 38%; text-align: center; font-size: 11px; line-height: 1.25 }
+  .det small { display: none }
+  .brand p { font-size: 13px }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important }
+}

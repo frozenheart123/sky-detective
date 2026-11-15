@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sky Detective: project demo</title>
+<meta name="description" content="Seven slides about Sky Detective, a blink comparator for NASA's SPHEREx infrared sky survey. The slides embed the live tool.">
+<!-- AI-assisted: written with Claude Code (Anthropic). The embedded pictures are real SPHEREx data, not AI-generated. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Seven slides, one screen each; scroll, or use the arrow keys. Dark like the photographic plates in the tool. */
+:root {
+  color-scheme: dark;
+  --bg: #070b16; --panel: #111827; --line: #263352; --ink: #eef2fb; --muted: #a3afc8;
+  --pink: #ff5fa2; --lime: #c8f560; --blue: #5fb0f0; --teal: #4de3c8;
+  --font: "Atkinson Hyperlegible Next", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+* { box-sizing: border-box }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; background: var(--bg) }
+body { margin: 0; color: var(--ink); font: 19px/1.5 var(--font) }
+h1, h2, p, ul, ol { margin: 0 }
+a { color: var(--blue) }
+.slide { min-height: 100vh; scroll-snap-align: start; display: grid; align-content: center; padding: 44px max(24px, 5vw) 64px; position: relative }
+.wrap { width: min(1180px, 100%); margin: 0 auto; display: grid; gap: 26px }
+.two { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); align-items: center; gap: 44px }
+.kicker { font: 500 14px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--lime) }
+h1 { font-size: clamp(44px, 7vw, 86px); line-height: 1; font-weight: 700; letter-spacing: -.02em; text-wrap: balance }
+h2 { font-size: clamp(30px, 4vw, 46px); line-height: 1.1; font-weight: 700; text-wrap: balance }
+.lead { font-size: clamp(20px, 2.3vw, 26px); color: var(--muted); max-width: 34em; text-wrap: pretty }
+.lead strong, li strong { color: var(--ink) }
+.dots { display: inline-flex; gap: 8px; vertical-align: middle }
+.dots i { width: .5em; height: .5em; border-radius: 50%; background: var(--pink) }
+.dots i + i { background: var(--lime) }
+.num { position: absolute; right: max(24px, 5vw); bottom: 22px; font: 500 14px var(--mono); color: var(--muted) }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px }
+.stat { border-top: 2px solid var(--line); padding-top: 14px }
+.stat b { display: block; font-size: clamp(34px, 5vw, 58px); line-height: 1; color: var(--blue); font-variant-numeric: tabular-nums }
+.stat span { color: var(--muted); font-size: 17px }
+ol.steps { list-style: none; padding: 0; display: grid; gap: 16px; counter-reset: s }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: start }
+ol.steps li::before { content: counter(s); display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--lime); color: #101503; font-weight: 700; font-size: 20px }
+ol.steps b { display: block; font-size: 22px }
+ol.steps span { color: var(--muted) }
+ul.points { padding: 0; list-style: none; display: grid; gap: 12px }
+ul.points li { padding-left: 26px; position: relative; color: var(--muted) }
+ul.points li::before { content: ""; position: absolute; left: 4px; top: .62em; width: 9px; height: 9px; border-radius: 50%; background: var(--teal) }
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 36px }
+iframe { border: 1px solid var(--line); border-radius: 16px; background: #000; width: 100%; display: block }
+.live { justify-self: center; width: min(430px, 100%) }
+.live iframe { height: 620px }
+.tag { display: inline-flex; align-items: center; gap: 8px; font: 500 13px var(--mono); color: var(--lime); margin-bottom: 8px }
+.tag::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--lime); animation: pulse 1.4s ease-in-out infinite }
+@keyframes pulse { 50% { opacity: .25 } }
+.five { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px }
+.five iframe { height: 256px }
+.five p { font-size: 15px; color: var(--muted); margin-top: 8px; line-height: 1.35 }
+.five p b { color: var(--ink); display: block }
+.shot { width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); display: block }
+.table-wrap { overflow-x: auto }
+table { border-collapse: collapse; width: 100%; font-size: 17px; font-variant-numeric: tabular-nums }
+th, td { text-align: left; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--line); vertical-align: top }
+th { font: 500 13px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
+td.v { color: var(--lime); font-weight: 600; white-space: nowrap }
+.note { font-size: 15px; color: var(--muted) }
+.cta { display: inline-block; padding: 12px 22px; border-radius: 12px; background: var(--lime); color: #101503; font-weight: 700; text-decoration: none }
+.nav { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 8px; z-index: 5 }
+.nav button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: rgba(17, 24, 39, .9); color: var(--ink); font-size: 18px; cursor: pointer }
+.nav button:focus-visible, a:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px }
+@media (max-width: 900px) {
+  body { font-size: 17px }
+  .two { grid-template-columns: minmax(0, 1fr) }
+  .five { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .cols, .stats { grid-template-columns: minmax(0, 1fr) }
+  html { scroll-snap-type: none }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto } .tag::before { animation: none } }
+@media print { html { scroll-snap-type: none } .slide { min-height: auto; page-break-after: always; padding: 30px } .nav { display: none } }
+</style>
+</head>
+<body>
+
+<section class="slide" id="s1">
+  <div class="wrap two">
+    <div style="display:grid;gap:22px">
+      <p class="kicker">NASA Space Apps Challenge 2026 · Planet X and SPHEREx · Singapore</p>
+      <h1>Sky Detective <span class="dots"><i></i><i></i></span></h1>
+      <p class="lead">A blink comparator for NASA's SPHEREx infrared sky survey. Pick any spot in the sky, watch it blink, and <strong>see what moved or changed</strong>.</p>
+      <p><a class="cta" href="./">Open the live tool</a></p>
+      <p class="note">On the right: the real tool, running on real SPHEREx images of Barnard's Star.</p>
+    </div>
+    <div class="live"><p class="tag">LIVE</p><iframe src="./?embed=1&amp;target=barnard&amp;gaia=0&amp;lang=en" title="Live Sky Detective player: Barnard's Star"></iframe></div>
+  </div>
+  <span class="num">1 / 7</span>
+</section>
+
+<section class="slide" id="s2">
+  <div class="wrap">
+    <p class="kicker">Why</p>
+    <h2>Pluto was found by blinking two photographs. SPHEREx gives us a billion things to blink.</h2>
+    <p class="lead">A point of light that jumps between two pictures of the same sky is close to us: a comet, an asteroid, a nearby star, a brown dwarf, perhaps a new planet. A point that brightens or fades is a star doing something.</p>
+    <div class="stats">
+      <div class="stat"><b>102</b><span>infrared colours in every SPHEREx map</span></div>
+      <div class="stat"><b>6 months</b><span>between two maps of the whole sky</span></div>
+      <div class="stat"><b>1 billion+</b><span>objects, too many for scientists alone</span></div>
+    </div>
+    <p class="lead">Volunteers have already found most known brown dwarfs this way. <strong>Sky Detective lets anyone do it with SPHEREx, even a 12-year-old.</strong></p>
+  </div>
+  <span class="num">2 / 7</span>
+</section>
+
+<section class="slide" id="s3">
+  <div class="wrap two">
+    <div style="display:grid;gap:26px">
+      <p class="kicker">How it works</p>
+      <h2>Three steps, no astronomy needed</h2>
+      <ol class="steps">
+        <li><div><b>Pick a spot</b><span>A star name, Right Ascension and Declination, or a link with the coordinates in it.</span></div></li>
+        <li><div><b>Watch it blink</b><span>The tool finds the SPHEREx images of that spot, lines them up and stacks them for each sky visit, then plays them like a short video.</span></div></li>
+        <li><div><b>Tap a star</b><span>The tool measures it for you: how far it moved, how its brightness changed, and its infrared spectrum.</span></div></li>
+      </ol>
+      <p class="note">Three views: Blink, Difference (only what changed) and Add (all visits together). Six detectors can be shown alone or added together. Field of view 3, 5 or 10 arcminutes.</p>
+    </div>
+    <div class="live"><p class="tag">LIVE · difference view</p><iframe loading="lazy" src="./?embed=1&amp;target=barnard&amp;mode=diff&amp;gaia=0&amp;lang=en" title="Live Sky Detective player: Barnard's Star, difference view"></iframe></div>
+  </div>
+  <span class="num">3 / 7</span>
+</section>
+
+<section class="slide" id="s4">
+  <div class="wrap two">
+    <div style="display:grid;gap:20px">
+      <p class="kicker">It measures, it does not only show</p>
+      <h2>Tested on the five targets of the challenge</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Target</th><th>Measured from SPHEREx</th><th>Check</th></tr></thead>
+        <tbody>
+          <tr><td>Barnard's Star</td><td class="v">10.3″ per year, north</td><td>known: 10.4″</td></tr>
+          <tr><td>Epsilon Indi B</td><td class="v">4.5″ per year, south-east</td><td>Gaia DR3: 4.7″</td></tr>
+          <tr><td>WISE 0855</td><td class="v">9.6″ in 12 months, west</td><td>known: 8.1″ per year; blended with a star 3″ away</td></tr>
+          <tr><td>RW Aurigae</td><td class="v">dims 47% at 3.8 to 5 µm</td><td>brightens at short wavelengths</td></tr>
+          <tr><td>R Draconis</td><td class="v">brightness swings 74%</td><td>core saturated: no position given</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Each SPHEREx picture sees one wavelength, so every picture adds one point to a star's spectrum. The lines in the screenshot are RW Aurigae's spectrum in three visits.</p>
+    </div>
+    <img class="shot" src="img/app-rwaur.jpg" width="800" height="527" alt="Screenshot of Sky Detective showing RW Aurigae, its brightness in three visits and its infrared spectrum">
+  </div>
+  <span class="num">4 / 7</span>
+</section>
+
+<section class="slide" id="s5">
+  <div class="wrap">
+    <p class="kicker">All five, live</p>
+    <h2>Three that move, two that change</h2>
+    <div class="five">
+      <div><iframe loading="lazy" src="./?embed=1&amp;target=barnard&amp;gaia=0&amp;lang=en" title="Live: Barnard's Star"></iframe><p><b>Barnard's Star</b>steps north</p></div>
+      <div><iframe loading="lazy" src="./?embed=1&amp;target=wise0855&amp;gaia=0&amp;lang=en" title="Live: WISE 0855"></iframe><p><b>WISE 0855</b>faint dot slides west (D5 + D6)</p></div>
+      <div><iframe loading="lazy" src="./?embed=1&amp;target=epsindi&amp;gaia=0&amp;lang=en" title="Live: Epsilon Indi B"></iframe><p><b>Epsilon Indi B</b>shifts one pixel south-east</p></div>
+      <div><iframe loading="lazy" src="./?embed=1&amp;target=rwaur&amp;gaia=0&amp;lang=en" title="Live: RW Aurigae"></iframe><p><b>RW Aurigae</b>fades between visits</p></div>
+      <div><iframe loading="lazy" src="./?embed=1&amp;target=rdra&amp;gaia=0&amp;lang=en" title="Live: R Draconis"></iframe><p><b>R Draconis</b>its glow grows and shrinks</p></div>
+    </div>
+    <p class="note">The yellow ring marks the star the tool measured. Each frame is a stack of real SPHEREx images from one sky visit.</p>
+  </div>
+  <span class="num">5 / 7</span>
+</section>
+
+<section class="slide" id="s6">
+  <div class="wrap">
+    <p class="kicker">Under the hood</p>
+    <h2>Fast, checked, and always on the newest data</h2>
+    <div class="cols">
+      <ul class="points">
+        <li><strong>Reads 60 KB instead of 65 MB per image.</strong> Only the FITS header and the pixel rows around the target, with HTTP range requests.</li>
+        <li><strong>Our own coordinate maths, checked against astropy.</strong> TAN projection with SIP distortion and the SPHEREx wavelength table, in JavaScript, with 19 automated tests.</li>
+        <li><strong>Live queries to NASA/IPAC IRSA.</strong> New SPHEREx data appears with no change to the tool; a new release is one line.</li>
+        <li><strong>Pictures build up while you watch.</strong> Stacking runs in the browser and sharpens as images arrive.</li>
+      </ul>
+      <ul class="points">
+        <li><strong>Add and subtract.</strong> Add detectors together for a better signal; subtract visits to leave only what changed.</li>
+        <li><strong>Other telescopes.</strong> Gaia DR3 stars from ESA, moved to the date of each picture; fast stars get an arrow.</li>
+        <li><strong>Data flags.</strong> Cosmic-ray hits, saturation, snowballs and satellite streaks reported by the SPHEREx pipeline are listed.</li>
+        <li><strong>Shareable and embeddable.</strong> Coordinates live in the address; these slides embed the tool with <span style="font-family:var(--mono);font-size:.85em">?embed=1</span>.</li>
+      </ul>
+    </div>
+  </div>
+  <span class="num">6 / 7</span>
+</section>
+
+<section class="slide" id="s7">
+  <div class="wrap">
+    <p class="kicker">Where it stands</p>
+    <h2>Ready for classrooms and volunteers. Next: let it point out the movers itself.</h2>
+    <div class="cols">
+      <ul class="points">
+        <li><strong>Works today:</strong> the five test targets, from saved copies of the processed SPHEREx data.</li>
+        <li><strong>Any other coordinates</strong> are read live from IRSA. Its image search had an outage on the last evening of the hackathon; the tool tells you when the archive does not answer.</li>
+        <li><strong>A find along the way:</strong> in 2026 WISE 0855 passes 3″ from a background star, closer than one SPHEREx pixel.</li>
+      </ul>
+      <ul class="points">
+        <li><strong>Next:</strong> automatic marking of sources that moved or changed.</li>
+        <li><strong>Next:</strong> a sky map to choose a spot by clicking, and fast solar-system objects.</li>
+        <li><strong>Who it is for:</strong> students, teachers and citizen scientists, in English and Chinese, on a phone or a laptop.</li>
+      </ul>
+    </div>
+    <p><a class="cta" href="./">Try Sky Detective</a></p>
+    <p class="note">Data: SPHEREx Level-2 spectral images (DR1 and QR3), a joint project of JPL and Caltech funded by NASA, served by NASA/IPAC IRSA. Star positions: Gaia DR3 (ESA). Built with an AI coding assistant (Claude Code, Anthropic). Every sky picture is real SPHEREx data; none is AI-generated.</p>
+  </div>
+  <span class="num">7 / 7</span>
+</section>
+
+<div class="nav"><button type="button" id="up" aria-label="Previous slide">↑</button><button type="button" id="down" aria-label="Next slide">↓</button></div>
+<script>
+(() => {
+  const slides = [...document.querySelectorAll('.slide')];
+  const current = () => slides.reduce((best, s, i) => (Math.abs(s.getBoundingClientRect().top) < Math.abs(slides[best].getBoundingClientRect().top) ? i : best), 0);
+  const go = (d) => slides[Math.max(0, Math.min(slides.length - 1, current() + d))].scrollIntoView();
+  document.getElementById('up').addEventListener('click', () => go(-1));
+  document.getElementById('down').addEventListener('click', () => go(1));
+  document.addEventListener('keydown', (e) => {
+    if (['ArrowDown', 'ArrowRight', 'PageDown'].includes(e.key)) { e.preventDefault(); go(1); }
+    else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+  });
+})();
+</script>
+</body>
+</html>

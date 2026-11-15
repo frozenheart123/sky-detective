@@ -1,0 +1,15 @@
+{
+  "name": "sky-detective",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Blink real SPHEREx infrared images of any patch of sky to spot moving and changing objects.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "node scripts/dev-server.js",
+    "build": "node scripts/check.js",
+    "test": "node --test \"tests/*.test.js\""
+  }
+}
